@@ -13,7 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TranslationService.Application\TranslationService.Application.csproj" />
     <ProjectReference Include="..\TranslationService.Domain\TranslationService.Domain.csproj" />
+    <ProjectReference Include="..\TranslationService.Infrastructure\TranslationService.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -19,5 +19,15 @@
         /// Identificator.
         /// </summary>
         public Guid Guid { get; set; }
+
+        /// <summary>
+        /// Active Page number.
+        /// </summary>
+        public int PageNumber { get; set; }
+
+        /// <summary>
+        /// The overall number of the pages in the book.
+        /// </summary>
+        public int PageCount { get; set; }
     }
 }

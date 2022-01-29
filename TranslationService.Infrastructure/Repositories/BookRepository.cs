@@ -1,6 +1,5 @@
-﻿using System.Reflection;
+﻿using Newtonsoft.Json;
 using System.Text;
-using System.Text.Json;
 using TranslationService.Domain;
 using TranslationService.Domain.Book;
 using TranslationService.Domain.Book.V1;
@@ -9,37 +8,45 @@ namespace TranslationService.Infrastructure.Repositories
 {
     public class BookRepository : IRepository<Book>
     {
+        readonly private string _dataPath = Path.Combine($"{Directory.GetCurrentDirectory()}.Infrastructure", "Content/bookData.json");
+
+        readonly private int _pageSize = 50;
+
         public async Task<Guid> CreateAsync(Book entity)
         {
-            var path = $"{Assembly.GetCallingAssembly().Location}/Content/bookData.json";
-            List<BookJson> books = null;
+            var books = await GetAllBooksAsync();
 
-            using (var openStream = File.OpenRead(path))
-            {
-                if(openStream == null)
-                {
-                    throw new Exception($"{nameof(openStream)} is null");
-                }
-                books = await JsonSerializer.Deserialize<Task<List<BookJson>>>(openStream);
+            var guid = Guid.NewGuid();
 
-                if (books == null)
-                {
-                    throw new Exception("The book section is not found");
-                }
-            }
-
-            var guid = new Guid();
-
-            var book = new BookJson { Title = entity.Title, Guid = guid };
+            var book = new BookJson { Title = entity.Title, Guid = guid, PageNumber = 1 };
 
             books.Add(book);
 
-            using (var writeStream = File.OpenWrite(path))
+            var pathCreatedFile = GetContentBookPath(guid);
+
+            using (var stream = File.Create(pathCreatedFile))
+                using(var writer = new StreamWriter(stream))
             {
-                await JsonSerializer.SerializeAsync(writeStream, books);
+                var lines = entity.Content.Split('\n');
+                var builder = new StringBuilder();
+
+                for(var i = 0; i < lines.Length; i++)
+                {
+                    if(i % _pageSize == 0)
+                    {
+                        var pageNumber = (i / _pageSize) + 1;
+                        builder.Append($"\n{{{pageNumber}}}\n");
+
+                        book.PageCount = pageNumber;
+                    }
+
+                    builder.Append(lines[i]);
+                }
+
+                await writer.WriteAsync(builder.ToString());
             }
 
-            await File.WriteAllTextAsync($"{Assembly.GetCallingAssembly().Location}/Content/${guid}.txt", entity.Content);
+            await File.WriteAllTextAsync(_dataPath, JsonConvert.SerializeObject(books));
 
             return guid;
         }
@@ -54,9 +61,24 @@ namespace TranslationService.Infrastructure.Repositories
             ;
         }
 
-        public Task<Book> GetAsync(Guid id)
+        public async Task<Book> GetAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var books = await GetAllBooksAsync();
+            var bookText = await File.ReadAllTextAsync(GetContentBookPath(id));
+            var bookJson = books.FirstOrDefault(b => b.Guid == id);
+            var pageNumberPosition = bookText.IndexOf($"{{{bookJson.PageNumber}}}") + 4;
+            var nextPageNumberPosition = bookText.IndexOf($"{{{bookJson.PageNumber + 1}}}");
+            var length = nextPageNumberPosition == -1 ? bookText.Length - pageNumberPosition : nextPageNumberPosition - pageNumberPosition;
+            var pageText = bookText.Substring(pageNumberPosition, length);
+
+            return new Book
+            {
+                Guid = bookJson.Guid,
+                Title = bookJson.Title,
+                PageNumber = bookJson.PageNumber,
+                Content = pageText,
+                PageCount = bookJson.PageCount
+            };
         }
 
         public Task SaveAsync()
@@ -68,5 +90,22 @@ namespace TranslationService.Infrastructure.Repositories
         {
             throw new NotImplementedException();
         }
+
+        private async Task<List<BookJson>> GetAllBooksAsync()
+        {
+            var jsonData = await File.ReadAllTextAsync(_dataPath);
+
+            var books = JsonConvert.DeserializeObject<List<BookJson>>(jsonData);
+
+            if (books == null)
+            {
+                throw new Exception($"{nameof(books)} is null");
+            }
+
+            return books;
+        }
+
+        private string GetContentBookPath(Guid guid) =>
+            Path.Combine($"{Directory.GetCurrentDirectory()}.Infrastructure", $"Content/Books/${guid}.txt");
     }
 }

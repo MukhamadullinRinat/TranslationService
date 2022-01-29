@@ -1,5 +1,11 @@
 using MediatR;
 using System.Reflection;
+using TranslationService.Application.Book.V1;
+using TranslationService.Domain;
+using TranslationService.Domain.Book.V1;
+using TranslationService.Domain.Book.V1.POST;
+using TranslationService.Infrastructure.Repositories;
+using BookDTO = TranslationService.Domain.Book.V1.Book;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +17,9 @@ builder.Services.AddControllers();
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IRequestHandler<BookRequest, BookDTO>, BookPostHandler>();
+builder.Services.AddScoped<IRepository<Book>, BookRepository>();
 
 var app = builder.Build();
 
