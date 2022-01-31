@@ -3,10 +3,11 @@ using System.Text;
 using TranslationService.Domain;
 using TranslationService.Domain.Book;
 using TranslationService.Domain.Book.V1;
+using TranslationService.Domain.Book.V1.List;
 
 namespace TranslationService.Infrastructure.Repositories
 {
-    public class BookRepository : IRepository<Book>
+    public class BookRepository : IRepository<Book, BookFilter>
     {
         readonly private string _dataPath = Path.Combine($"{Directory.GetCurrentDirectory()}.Infrastructure", "Content/bookData.json");
 
@@ -51,14 +52,27 @@ namespace TranslationService.Infrastructure.Repositories
             return guid;
         }
 
-        public Task DeleteAsync(Book entity)
+        public async Task<Guid> DeleteAsync(Guid guid)
         {
-            throw new NotImplementedException();
+            var books = await GetAllBooksAsync();
+
+            await File.WriteAllTextAsync(_dataPath, JsonConvert.SerializeObject(books.Where(b => !b.Guid.Equals(guid))));
+
+            File.Delete(GetContentBookPath(guid));
+
+            return guid;
         }
 
         public void Dispose()
         {
             ;
+        }
+
+        public async Task<IEnumerable<Book>> GetAllAsync(BookFilter filter)
+        {
+            var books = (await GetAllBooksAsync()).Select(b => new Book { Guid = b.Guid, PageCount = b.PageCount, PageNumber = b.PageNumber, Title = b.Title });
+
+            return filter?.Title != null ? books.Where(b => b.Title == filter.Title) : books;
         }
 
         public async Task<Book> GetAsync(Guid id)
@@ -86,9 +100,19 @@ namespace TranslationService.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
-        public Task UpdateAsync(Book entity)
+        public async Task UpdateAsync(Book entity)
         {
-            throw new NotImplementedException();
+            var books = (await GetAllBooksAsync()).Select(b => {
+                if (entity.Guid.Equals(b.Guid))
+                {
+                    b.Title = entity.Title;
+                    b.PageNumber = entity.PageNumber;
+                }
+
+                return b;
+            });
+
+            await File.WriteAllTextAsync(_dataPath, JsonConvert.SerializeObject(books));
         }
 
         private async Task<List<BookJson>> GetAllBooksAsync()

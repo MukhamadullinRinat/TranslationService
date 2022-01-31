@@ -5,7 +5,7 @@ namespace TranslationService.Domain.Book.V1.POST
     /// <summary>
     /// Book 
     /// </summary>
-    public class BookRequest : IRequest<Book>
+    public class BookRequestPost : IRequest<Book>
     {
         /// <summary>
         /// The title of the book.

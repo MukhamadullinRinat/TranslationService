@@ -2,23 +2,20 @@
 using TranslationService.Domain.Book.V1.POST;
 using TranslationService.Domain;
 using BookDTO = TranslationService.Domain.Book.V1.Book;
-using iText.Kernel.Pdf;
-using iText.Kernel.Pdf.Canvas.Parser.Listener;
-using System.Text;
-using iText.Kernel.Pdf.Canvas.Parser;
+using TranslationService.Domain.Book.V1.List;
 
 namespace TranslationService.Application.Book.V1
 {
-    public class BookPostHandler : IRequestHandler<BookRequest, BookDTO>
+    public class BookPostHandler : IRequestHandler<BookRequestPost, BookDTO>
     {
-        private readonly IRepository<BookDTO> _repository;
+        private readonly IRepository<BookDTO, BookFilter> _repository;
 
-        public BookPostHandler(IRepository<BookDTO> repository)
+        public BookPostHandler(IRepository<BookDTO, BookFilter> repository)
         {
             _repository = repository;
         }
 
-        public async Task<BookDTO> Handle(BookRequest request, CancellationToken cancellationToken)
+        public async Task<BookDTO> Handle(BookRequestPost request, CancellationToken cancellationToken)
         {
             if(request.FileType != "text/plain")
             {
