@@ -6,13 +6,12 @@ using BookDTO = TranslationService.Domain.Book.V1.Book;
 
 namespace TranslationService.Application.Book.V1
 {
-    public class BookPutHandler : IRequestHandler<BookRequestPut, BookDTO>
+    public class BookPutHandler : BookHandler, IRequestHandler<BookRequestPut, BookDTO>
     {
-        private readonly IRepository<BookDTO, BookFilter> _repository;
-
         public BookPutHandler(IRepository<BookDTO, BookFilter> repository)
+            : base(repository)
         {
-            _repository = repository;
+            ;
         }
 
         public async Task<BookDTO> Handle(BookRequestPut request, CancellationToken cancellationToken)
