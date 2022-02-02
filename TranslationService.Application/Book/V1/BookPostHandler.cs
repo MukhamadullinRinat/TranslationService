@@ -2,13 +2,13 @@
 using TranslationService.Domain.Book.V1.POST;
 using TranslationService.Domain;
 using BookDTO = TranslationService.Domain.Book.V1.Book;
-using TranslationService.Domain.Book.V1.List;
+using TranslationService.Domain.Book;
 
 namespace TranslationService.Application.Book.V1
 {
     public class BookPostHandler : BookHandler, IRequestHandler<BookRequestPost, BookDTO>
     {
-        public BookPostHandler(IRepository<BookDTO, BookFilter> repository)
+        public BookPostHandler(IBookRepository repository)
             : base(repository)
         {
             ;
@@ -16,19 +16,21 @@ namespace TranslationService.Application.Book.V1
 
         public async Task<BookDTO> Handle(BookRequestPost request, CancellationToken cancellationToken)
         {
-            if(request.FileType != "text/plain")
+            var createModel = new BookCreateModel { FileType = request.FileType, Title = request.Title };
+
+            if (createModel.IsTextType)
             {
-                throw new Exception("The type of the file is not correct.");
+                using(var streamReader = new StreamReader(request.Stream))
+                {
+                    createModel.Content = streamReader.ReadToEnd();
+                }
             }
 
-            using(var streamReader = new StreamReader(request.Stream))
-            {
-                var guid = await _repository.CreateAsync(new BookDTO { Content = streamReader.ReadToEnd(), Title = request.Title });
+            createModel.Stream = request.Stream;
 
-                await _repository.SaveAsync();
+            var guid = await _repository.CreateAsync(createModel);
 
-                return await _repository.GetAsync(guid);
-            }
+            return await _repository.GetAsync(guid);
         }
     }
 }

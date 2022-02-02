@@ -29,5 +29,7 @@
         /// The overall number of the pages in the book.
         /// </summary>
         public int PageCount { get; set; }
+
+        public string Extention { get; set; }
     }
 }

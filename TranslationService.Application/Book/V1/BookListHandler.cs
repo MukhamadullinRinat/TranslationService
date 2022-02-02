@@ -7,7 +7,7 @@ namespace TranslationService.Application.Book.V1
 {
     public class BookListHandler : BookHandler, IRequestHandler<BookFilter, IEnumerable<BookDTO>>
     {
-        public BookListHandler(IRepository<BookDTO, BookFilter> repository)
+        public BookListHandler(IBookRepository repository)
             : base(repository)
         {
             ;

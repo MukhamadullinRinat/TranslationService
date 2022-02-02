@@ -8,7 +8,7 @@ namespace TranslationService.Application.Word.V1
 {
     public class WordPostHandler : WordHandler, IRequestHandler<WordRequestPost, WordDTO>
     {
-        public WordPostHandler(IRepository<WordDTO, WordFilter> repository)
+        public WordPostHandler(IRepository<WordDTO, WordDTO, WordFilter> repository)
             : base(repository)
         {
             ;

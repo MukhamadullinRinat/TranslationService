@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TranslationService.Domain.Book.V1;
 using TranslationService.Domain.Book.V1.DELETE;
+using TranslationService.Domain.Book.V1.File;
 using TranslationService.Domain.Book.V1.GET;
 using TranslationService.Domain.Book.V1.List;
 using TranslationService.Domain.Book.V1.POST;
@@ -50,5 +51,13 @@ namespace TranslationService.Controllers
         [HttpDelete("{guid}")]
         public async Task<Guid> DeleteAsync([FromRoute]Guid guid) =>
             await _mediator.Send(new BookRequestDelete { Guid = guid });
+
+        [HttpGet("file/{guid}")]
+        public async Task<IActionResult> GetFileAsync([FromRoute]Guid guid)
+        {
+            var file = await _mediator.Send(new BookRequestFileGet { Guid = guid });
+
+            return File(file.File, file.ContentType, file.Name);
+        }
     }
 }

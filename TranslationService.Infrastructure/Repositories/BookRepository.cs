@@ -7,44 +7,54 @@ using TranslationService.Domain.Book.V1.List;
 
 namespace TranslationService.Infrastructure.Repositories
 {
-    public class BookRepository : IRepository<Book, BookFilter>
+    public class BookRepository : IBookRepository
     {
         readonly private string _dataPath = Path.Combine($"{Directory.GetCurrentDirectory()}.Infrastructure", "Content/bookData.json");
 
         readonly private int _pageSize = 50;
 
-        public async Task<Guid> CreateAsync(Book entity)
+        public async Task<Guid> CreateAsync(BookCreateModel entity)
         {
             var books = await GetAllBooksAsync();
 
             var guid = Guid.NewGuid();
 
-            var book = new BookJson { Title = entity.Title, Guid = guid, PageNumber = 1 };
+            var book = new BookJson { Title = entity.Title, Guid = guid, PageNumber = 1, Extention = entity.Extention };
 
             books.Add(book);
 
-            var pathCreatedFile = GetContentBookPath(guid);
+            var pathCreatedFile = GetContentBookPath(guid, entity.Extention);
 
             using (var stream = File.Create(pathCreatedFile))
-                using(var writer = new StreamWriter(stream))
             {
-                var lines = entity.Content.Split('\n');
-                var builder = new StringBuilder();
-
-                for(var i = 0; i < lines.Length; i++)
+                if (entity.Extention == ".txt")
                 {
-                    if(i % _pageSize == 0)
+                    using (var writer = new StreamWriter(stream))
                     {
-                        var pageNumber = (i / _pageSize) + 1;
-                        builder.Append($"\n{{{pageNumber}}}\n");
+                        var lines = entity.Content.Split('\n');
+                        var builder = new StringBuilder();
 
-                        book.PageCount = pageNumber;
+                        for (var i = 0; i < lines.Length; i++)
+                        {
+                            if (i % _pageSize == 0)
+                            {
+                                var pageNumber = (i / _pageSize) + 1;
+                                builder.Append($"\n{{{pageNumber}}}\n");
+
+                                book.PageCount = pageNumber;
+                            }
+
+                            builder.Append(lines[i]);
+                        }
+
+                        await writer.WriteAsync(builder.ToString());
                     }
-
-                    builder.Append(lines[i]);
                 }
-
-                await writer.WriteAsync(builder.ToString());
+                else
+                {
+                    entity.Stream.Seek(0, SeekOrigin.Begin);
+                    await entity.Stream.CopyToAsync(stream);
+                }
             }
 
             await File.WriteAllTextAsync(_dataPath, JsonConvert.SerializeObject(books));
@@ -55,10 +65,11 @@ namespace TranslationService.Infrastructure.Repositories
         public async Task<Guid> DeleteAsync(Guid guid)
         {
             var books = await GetAllBooksAsync();
+            var bookJson = books.FirstOrDefault(b => b.Guid == guid);
 
             await File.WriteAllTextAsync(_dataPath, JsonConvert.SerializeObject(books.Where(b => !b.Guid.Equals(guid))));
 
-            File.Delete(GetContentBookPath(guid));
+            File.Delete(GetContentBookPath(guid, bookJson.Extention));
 
             return guid;
         }
@@ -78,21 +89,35 @@ namespace TranslationService.Infrastructure.Repositories
         public async Task<Book> GetAsync(Guid id)
         {
             var books = await GetAllBooksAsync();
-            var bookText = await File.ReadAllTextAsync(GetContentBookPath(id));
             var bookJson = books.FirstOrDefault(b => b.Guid == id);
-            var pageNumberPosition = bookText.IndexOf($"{{{bookJson.PageNumber}}}") + 4;
-            var nextPageNumberPosition = bookText.IndexOf($"{{{bookJson.PageNumber + 1}}}");
-            var length = nextPageNumberPosition == -1 ? bookText.Length - pageNumberPosition : nextPageNumberPosition - pageNumberPosition;
-            var pageText = bookText.Substring(pageNumberPosition, length);
+            var content = string.Empty;
+
+            if (bookJson.Extention == ".txt")
+            {
+                var bookText = await File.ReadAllTextAsync(GetContentBookPath(id, bookJson.Extention));
+                var pageNumberPosition = bookText.IndexOf($"{{{bookJson.PageNumber}}}") + 4;
+                var nextPageNumberPosition = bookText.IndexOf($"{{{bookJson.PageNumber + 1}}}");
+                var length = nextPageNumberPosition == -1 ? bookText.Length - pageNumberPosition : nextPageNumberPosition - pageNumberPosition;
+                content = bookText.Substring(pageNumberPosition, length);
+            }
 
             return new Book
             {
                 Guid = bookJson.Guid,
                 Title = bookJson.Title,
                 PageNumber = bookJson.PageNumber,
-                Content = pageText,
-                PageCount = bookJson.PageCount
+                Content = content,
+                PageCount = bookJson.PageCount,
+                Extention = bookJson.Extention
             };
+        }
+
+        public async Task<FileStream> GetStreamAsync(Guid guid)
+        {
+            var books = await GetAllBooksAsync();
+            var bookJson = books.FirstOrDefault(b => b.Guid == guid);
+
+            return File.OpenRead(GetContentBookPath(guid, bookJson.Extention));
         }
 
         public Task SaveAsync()
@@ -129,7 +154,7 @@ namespace TranslationService.Infrastructure.Repositories
             return books;
         }
 
-        private string GetContentBookPath(Guid guid) =>
-            Path.Combine($"{Directory.GetCurrentDirectory()}.Infrastructure", $"Content/Books/${guid}.txt");
+        private string GetContentBookPath(Guid guid, string extention) =>
+            Path.Combine($"{Directory.GetCurrentDirectory()}.Infrastructure", $"Content/Books/${guid}{extention}");
     }
 }

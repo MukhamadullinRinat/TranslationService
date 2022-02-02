@@ -8,7 +8,7 @@ namespace TranslationService.Application.Book.V1
 {
     public class BookPutHandler : BookHandler, IRequestHandler<BookRequestPut, BookDTO>
     {
-        public BookPutHandler(IRepository<BookDTO, BookFilter> repository)
+        public BookPutHandler(IBookRepository repository)
             : base(repository)
         {
             ;

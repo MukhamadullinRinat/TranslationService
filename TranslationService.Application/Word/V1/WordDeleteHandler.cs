@@ -8,7 +8,7 @@ namespace TranslationService.Application.Word.V1
 {
     public class WordDeleteHandler : WordHandler, IRequestHandler<WordRequestDelete, Guid>
     {
-        public WordDeleteHandler(IRepository<WordDTO, WordFilter> repository)
+        public WordDeleteHandler(IRepository<WordDTO, WordDTO, WordFilter> repository)
             : base(repository)
         {
             ;

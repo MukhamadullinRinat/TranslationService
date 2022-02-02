@@ -8,7 +8,7 @@ namespace TranslationService.Application.Book.V1
 {
     public class BookDeleteHandler : BookHandler, IRequestHandler<BookRequestDelete, Guid>
     {
-        public BookDeleteHandler(IRepository<BookDTO, BookFilter> repository)
+        public BookDeleteHandler(IBookRepository repository)
             : base(repository)
         {
             ;

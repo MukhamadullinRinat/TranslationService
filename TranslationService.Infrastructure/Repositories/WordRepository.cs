@@ -5,7 +5,7 @@ using TranslationService.Domain.Word.V1.List;
 
 namespace TranslationService.Infrastructure.Repositories
 {
-    public class WordRepository : IRepository<Word, WordFilter>
+    public class WordRepository : IRepository<Word, Word, WordFilter>
     {
         readonly private string _dataPath = Path.Combine($"{Directory.GetCurrentDirectory()}.Infrastructure", "Content/wordData.json");
 

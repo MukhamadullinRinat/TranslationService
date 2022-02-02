@@ -3,7 +3,9 @@ using System.Reflection;
 using TranslationService.Application.Book.V1;
 using TranslationService.Application.Word.V1;
 using TranslationService.Domain;
+using TranslationService.Domain.Book;
 using TranslationService.Domain.Book.V1.DELETE;
+using TranslationService.Domain.Book.V1.File;
 using TranslationService.Domain.Book.V1.GET;
 using TranslationService.Domain.Book.V1.List;
 using TranslationService.Domain.Book.V1.POST;
@@ -28,19 +30,19 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IRequestHandler<BookRequestPost, BookDTO>, BookPostHandler>();
-builder.Services.AddScoped<IRepository<BookDTO, BookFilter>, BookRepository>();
+builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IRequestHandler<BookRequestGet, BookDTO>, BookGetHandler>();
 builder.Services.AddScoped<IRequestHandler<BookFilter, IEnumerable<BookDTO>>, BookListHandler>();
 builder.Services.AddScoped<IRequestHandler<BookRequestPut, BookDTO>, BookPutHandler>();
 builder.Services.AddScoped<IRequestHandler<BookRequestDelete, Guid>, BookDeleteHandler>();
+builder.Services.AddScoped<IRequestHandler<BookRequestFileGet, BookFileResponse>, BookFileGetHandler>();
 
-builder.Services.AddScoped<IRepository<WordDTO, WordFilter>, WordRepository>();
+builder.Services.AddScoped<IRepository<WordDTO, WordDTO, WordFilter>, WordRepository>();
 builder.Services.AddScoped<IRequestHandler<WordRequestGet, WordDTO>, WordGetHandler>();
 builder.Services.AddScoped<IRequestHandler<WordRequestPost, WordDTO>, WordPostHandler>();
 builder.Services.AddScoped<IRequestHandler<WordFilter, IEnumerable<WordDTO>>, WordListHandler>();
 builder.Services.AddScoped<IRequestHandler<WordRequestPut, WordDTO>, WordPutHandler>();
 builder.Services.AddScoped<IRequestHandler<WordRequestDelete, Guid>, WordDeleteHandler>();
-
 
 var app = builder.Build();
 

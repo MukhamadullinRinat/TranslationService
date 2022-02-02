@@ -8,7 +8,7 @@ namespace TranslationService.Application.Word.V1
 {
     public class WordPutHandler : WordHandler, IRequestHandler<WordRequestPut, WordDTO>
     {
-        public WordPutHandler(IRepository<WordDTO, WordFilter> repository)
+        public WordPutHandler(IRepository<WordDTO, WordDTO, WordFilter> repository)
             : base(repository)
         {
             ;

@@ -6,9 +6,9 @@ namespace TranslationService.Application.Word.V1
 {
     public class WordHandler
     {
-        protected readonly IRepository<WordDTO, WordFilter> _repository;
+        protected readonly IRepository<WordDTO, WordDTO, WordFilter> _repository;
 
-        public WordHandler(IRepository<WordDTO, WordFilter> repository)
+        public WordHandler(IRepository<WordDTO, WordDTO, WordFilter> repository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
