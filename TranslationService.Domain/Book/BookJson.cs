@@ -22,6 +22,8 @@
         /// </summary>
         public int PageCount { get; set; }
 
-        public string Extention { get; set; }
+        public string Extension { get; set; }
+
+        public string ContentType { get; set; }
     }
 }

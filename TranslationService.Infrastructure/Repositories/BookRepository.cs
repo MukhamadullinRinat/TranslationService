@@ -19,15 +19,15 @@ namespace TranslationService.Infrastructure.Repositories
 
             var guid = Guid.NewGuid();
 
-            var book = new BookJson { Title = entity.Title, Guid = guid, PageNumber = 1, Extention = entity.Extention };
+            var book = new BookJson { Title = entity.Title, Guid = guid, PageNumber = 1, Extension = entity.Extension, ContentType = entity.ContentType };
 
             books.Add(book);
 
-            var pathCreatedFile = GetContentBookPath(guid, entity.Extention);
+            var pathCreatedFile = GetContentBookPath(guid, entity.Extension);
 
             using (var stream = File.Create(pathCreatedFile))
             {
-                if (entity.Extention == ".txt")
+                if (entity.Extension == ".txt")
                 {
                     using (var writer = new StreamWriter(stream))
                     {
@@ -69,7 +69,7 @@ namespace TranslationService.Infrastructure.Repositories
 
             await File.WriteAllTextAsync(_dataPath, JsonConvert.SerializeObject(books.Where(b => !b.Guid.Equals(guid))));
 
-            File.Delete(GetContentBookPath(guid, bookJson.Extention));
+            File.Delete(GetContentBookPath(guid, bookJson.Extension));
 
             return guid;
         }
@@ -81,7 +81,15 @@ namespace TranslationService.Infrastructure.Repositories
 
         public async Task<IEnumerable<Book>> GetAllAsync(BookFilter filter)
         {
-            var books = (await GetAllBooksAsync()).Select(b => new Book { Guid = b.Guid, PageCount = b.PageCount, PageNumber = b.PageNumber, Title = b.Title });
+            var books = (await GetAllBooksAsync()).Select(b => new Book
+            {
+                Guid = b.Guid,
+                PageCount = b.PageCount,
+                PageNumber = b.PageNumber,
+                Title = b.Title,
+                Extension = b.Extension,
+                ContentType = b.ContentType
+            });
 
             return filter?.Title != null ? books.Where(b => b.Title == filter.Title) : books;
         }
@@ -92,9 +100,9 @@ namespace TranslationService.Infrastructure.Repositories
             var bookJson = books.FirstOrDefault(b => b.Guid == id);
             var content = string.Empty;
 
-            if (bookJson.Extention == ".txt")
+            if (bookJson.Extension == ".txt")
             {
-                var bookText = await File.ReadAllTextAsync(GetContentBookPath(id, bookJson.Extention));
+                var bookText = await File.ReadAllTextAsync(GetContentBookPath(id, bookJson.Extension));
                 var pageNumberPosition = bookText.IndexOf($"{{{bookJson.PageNumber}}}") + 4;
                 var nextPageNumberPosition = bookText.IndexOf($"{{{bookJson.PageNumber + 1}}}");
                 var length = nextPageNumberPosition == -1 ? bookText.Length - pageNumberPosition : nextPageNumberPosition - pageNumberPosition;
@@ -108,7 +116,8 @@ namespace TranslationService.Infrastructure.Repositories
                 PageNumber = bookJson.PageNumber,
                 Content = content,
                 PageCount = bookJson.PageCount,
-                Extention = bookJson.Extention
+                Extension = bookJson.Extension,
+                ContentType = bookJson.ContentType
             };
         }
 
@@ -117,7 +126,7 @@ namespace TranslationService.Infrastructure.Repositories
             var books = await GetAllBooksAsync();
             var bookJson = books.FirstOrDefault(b => b.Guid == guid);
 
-            return File.OpenRead(GetContentBookPath(guid, bookJson.Extention));
+            return File.OpenRead(GetContentBookPath(guid, bookJson.Extension));
         }
 
         public Task SaveAsync()
@@ -154,7 +163,7 @@ namespace TranslationService.Infrastructure.Repositories
             return books;
         }
 
-        private string GetContentBookPath(Guid guid, string extention) =>
-            Path.Combine($"{Directory.GetCurrentDirectory()}.Infrastructure", $"Content/Books/${guid}{extention}");
+        private string GetContentBookPath(Guid guid, string extension) =>
+            Path.Combine($"{Directory.GetCurrentDirectory()}.Infrastructure", $"Content/Books/${guid}{extension}");
     }
 }

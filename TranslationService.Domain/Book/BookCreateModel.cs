@@ -24,9 +24,14 @@
             get => this.FileType == "text/plain"; 
         }
 
-        public string Extention
+        public string Extension
         {
             get => Path.GetExtension(this.Title).ToLower();
+        }
+
+        public string ContentType
+        {
+            get => MimeTypeMap.List.MimeTypeMap.GetMimeType(this.Extension).FirstOrDefault();
         }
     }
 }

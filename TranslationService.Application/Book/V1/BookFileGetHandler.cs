@@ -19,7 +19,7 @@ namespace TranslationService.Application.Book.V1
 
             return new BookFileResponse
             {
-                ContentType = MimeTypeMap.List.MimeTypeMap.GetMimeType(book.Extention).FirstOrDefault(),
+                ContentType = book.ContentType,
                 File = fileStream,
                 Name = book.Title
             };
