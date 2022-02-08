@@ -38,7 +38,7 @@ namespace TranslationService.Infrastructure.Repositories
 
             if (!string.IsNullOrEmpty(filter.Value))
             {
-                words = words.Where(word => word.Value == filter.Value);
+                words = words.Where(word => word.Value == filter.Value.ToLower().Trim());
             }
 
             return words;
