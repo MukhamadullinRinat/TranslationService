@@ -1,15 +1,17 @@
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using TranslationService.Application.Book.V1;
+using TranslationService.Application.User.V1.Auth;
 using TranslationService.Application.Word.V1;
 using TranslationService.Domain;
-using TranslationService.Domain.Book;
 using TranslationService.Domain.Book.V1.DELETE;
 using TranslationService.Domain.Book.V1.File;
 using TranslationService.Domain.Book.V1.GET;
 using TranslationService.Domain.Book.V1.List;
 using TranslationService.Domain.Book.V1.POST;
 using TranslationService.Domain.Book.V1.PUT;
+using TranslationService.Domain.User.V1.Auth;
 using TranslationService.Domain.Word.V1.DELETE;
 using TranslationService.Domain.Word.V1.GET;
 using TranslationService.Domain.Word.V1.List;
@@ -44,6 +46,11 @@ builder.Services.AddScoped<IRequestHandler<WordFilter, IEnumerable<WordDTO>>, Wo
 builder.Services.AddScoped<IRequestHandler<WordRequestPut, WordDTO>, WordPutHandler>();
 builder.Services.AddScoped<IRequestHandler<WordRequestDelete, Guid>, WordDeleteHandler>();
 
+builder.Services.AddScoped<IUserAuthService, UserAuthService>();
+
+builder.Services.AddAuthentication("BasicAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -55,6 +62,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
