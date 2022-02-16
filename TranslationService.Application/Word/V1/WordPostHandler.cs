@@ -2,23 +2,22 @@
 using TranslationService.Domain;
 using TranslationService.Domain.Word.V1.List;
 using TranslationService.Domain.Word.V1.POST;
-using WordDTO = TranslationService.Domain.Word.V1.Word;
 
 namespace TranslationService.Application.Word.V1
 {
-    public class WordPostHandler : WordHandler, IRequestHandler<WordRequestPost, WordDTO>
+    using TranslationService.Domain.Word.V1;
+
+    public class WordPostHandler : WordHandler, IRequestHandler<WordRequestPost, Word>
     {
-        public WordPostHandler(IRepository<WordDTO, WordDTO, WordFilter> repository)
+        public WordPostHandler(IRepository<Word, Word, WordFilter> repository)
             : base(repository)
         {
             ;
         }
 
-        public async Task<WordDTO> Handle(WordRequestPost request, CancellationToken cancellationToken)
+        public async Task<Word> Handle(WordRequestPost request, CancellationToken cancellationToken)
         {
-            var word = new WordDTO { Description = request.Description, Value = request.Value };
-
-            word.DateToRepeate = DateTime.Now.AddDays(1);
+            var word = new Word { Description = request.Description, Value = request.Value, DateToRepeate = request.DateToRepeate };
 
             var guid = await _repository.CreateAsync(word);
 

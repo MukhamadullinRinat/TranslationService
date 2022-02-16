@@ -7,5 +7,7 @@ namespace TranslationService.Domain.Word.V1.POST
         public string Value { get; set; }
 
         public string Description { get; set; }
+
+        public DateTime DateToRepeate { get; set; }
     }
 }
