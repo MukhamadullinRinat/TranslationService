@@ -50,7 +50,7 @@ namespace TranslationService.Application.User.V1.Auth
                 return AuthenticateResult.Fail("Invalid Username or Password");
 
             var claims = new[] {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Guid.ToString()),
                 new Claim(ClaimTypes.Name, user.Name),
             };
             var identity = new ClaimsIdentity(claims, Scheme.Name);

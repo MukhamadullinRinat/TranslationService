@@ -18,8 +18,14 @@ using TranslationService.Domain.Word.V1.List;
 using TranslationService.Domain.Word.V1.POST;
 using TranslationService.Domain.Word.V1.PUT;
 using TranslationService.Infrastructure.Repositories;
-using BookDTO = TranslationService.Domain.Book.V1.Book;
-using WordDTO = TranslationService.Domain.Word.V1.Word;
+using BookEntity = TranslationService.Domain.Book.V1.Book;
+using WordEntity = TranslationService.Domain.Word.V1.Word;
+using UserEntity = TranslationService.Domain.User.User;
+using TranslationService.Domain.User.V1.List;
+using TranslationService.Application.User.V1;
+using TranslationService.Domain.User.V1.POST;
+using TranslationService.Domain.User.V1.GET;
+using TranslationService.Domain.User.V1.PUT;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,22 +37,27 @@ builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IRequestHandler<BookRequestPost, BookDTO>, BookPostHandler>();
+builder.Services.AddScoped<IRequestHandler<BookRequestPost, BookEntity>, BookPostHandler>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
-builder.Services.AddScoped<IRequestHandler<BookRequestGet, BookDTO>, BookGetHandler>();
-builder.Services.AddScoped<IRequestHandler<BookFilter, IEnumerable<BookDTO>>, BookListHandler>();
-builder.Services.AddScoped<IRequestHandler<BookRequestPut, BookDTO>, BookPutHandler>();
+builder.Services.AddScoped<IRequestHandler<BookRequestGet, BookEntity>, BookGetHandler>();
+builder.Services.AddScoped<IRequestHandler<BookFilter, IEnumerable<BookEntity>>, BookListHandler>();
+builder.Services.AddScoped<IRequestHandler<BookRequestPut, BookEntity>, BookPutHandler>();
 builder.Services.AddScoped<IRequestHandler<BookRequestDelete, Guid>, BookDeleteHandler>();
 builder.Services.AddScoped<IRequestHandler<BookRequestFileGet, BookFileResponse>, BookFileGetHandler>();
 
-builder.Services.AddScoped<IRepository<WordDTO, WordDTO, WordFilter>, WordRepository>();
-builder.Services.AddScoped<IRequestHandler<WordRequestGet, WordDTO>, WordGetHandler>();
-builder.Services.AddScoped<IRequestHandler<WordRequestPost, WordDTO>, WordPostHandler>();
-builder.Services.AddScoped<IRequestHandler<WordFilter, IEnumerable<WordDTO>>, WordListHandler>();
-builder.Services.AddScoped<IRequestHandler<WordRequestPut, WordDTO>, WordPutHandler>();
+builder.Services.AddScoped<IRepository<WordEntity, WordEntity, WordFilter>, WordRepository>();
+builder.Services.AddScoped<IRequestHandler<WordRequestGet, WordEntity>, WordGetHandler>();
+builder.Services.AddScoped<IRequestHandler<WordRequestPost, WordEntity>, WordPostHandler>();
+builder.Services.AddScoped<IRequestHandler<WordFilter, IEnumerable<WordEntity>>, WordListHandler>();
+builder.Services.AddScoped<IRequestHandler<WordRequestPut, WordEntity>, WordPutHandler>();
 builder.Services.AddScoped<IRequestHandler<WordRequestDelete, Guid>, WordDeleteHandler>();
 
 builder.Services.AddScoped<IUserAuthService, UserAuthService>();
+builder.Services.AddScoped<IRepository<UserEntity, UserEntity, UserFilter>, UserRepository>();
+builder.Services.AddScoped<IRequestHandler<UserPostRequest, UserEntity>, UserPostHandler>();
+builder.Services.AddScoped<IRequestHandler<UserGetRequest, UserEntity>, UserGetHandler>();
+builder.Services.AddScoped<IRequestHandler<UserPutRequest, UserEntity>, UserPutHandler>();
+builder.Services.AddScoped<IRequestHandler<UserFilter, IEnumerable<UserEntity>>, UserListHandler>();
 
 builder.Services.AddAuthentication("BasicAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);

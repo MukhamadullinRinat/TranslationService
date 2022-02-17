@@ -2,19 +2,19 @@
 using TranslationService.Domain;
 using TranslationService.Domain.Word.V1.GET;
 using TranslationService.Domain.Word.V1.List;
-using WordDTO = TranslationService.Domain.Word.V1.Word;
 
 namespace TranslationService.Application.Word.V1
 {
-    public class WordGetHandler : WordHandler, IRequestHandler<WordRequestGet, WordDTO>
+    using TranslationService.Domain.Word.V1;
+    public class WordGetHandler : WordHandler, IRequestHandler<WordRequestGet, Word>
     {
-        public WordGetHandler(IRepository<WordDTO, WordDTO, WordFilter> repository)
+        public WordGetHandler(IRepository<Word, Word, WordFilter> repository)
             : base(repository)
         {
             ;
         }
 
-        public Task<WordDTO> Handle(WordRequestGet request, CancellationToken cancellationToken) =>
+        public Task<Word> Handle(WordRequestGet request, CancellationToken cancellationToken) =>
             _repository.GetAsync(request.Guid);
     }
 }
