@@ -1,12 +1,21 @@
-﻿using TranslationService.Domain.User.V1.Auth;
+﻿using TranslationService.Domain;
+using TranslationService.Domain.User.V1.Auth;
+using TranslationService.Domain.User.V1.List;
 
 namespace TranslationService.Application.User.V1.Auth
 {
+    using TranslationService.Domain.User;
+
     public class UserAuthService : IUserAuthService
     {
-        public Task<Domain.User.User> Authenticate(string username, string password)
+        private readonly IRepository<User, User, UserFilter> _repository;
+
+        public UserAuthService(IRepository<User, User, UserFilter> repository)
         {
-            throw new NotImplementedException();
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
+
+        public async Task<User> Authenticate(string email, string password) =>
+            (await _repository.GetAllAsync(new UserFilter { Email = email })).FirstOrDefault();
     }
 }

@@ -22,9 +22,15 @@ namespace TranslationService.Infrastructure.Repositories
             return entity.Guid;
         }
 
-        public Task<Guid> DeleteAsync(Guid guid)
+        public async Task<Guid> DeleteAsync(Guid guid)
         {
-            throw new NotImplementedException();
+            var users = await GetAllUsersAsync();
+
+            users = users.Any(u => u.Guid == guid) ? users.Where(u => u.Guid != guid) : throw new ArgumentException($"{nameof(guid)} is not found");
+
+            await File.WriteAllTextAsync(_dataPath, JsonConvert.SerializeObject(users));
+
+            return guid;
         }
 
         public void Dispose()

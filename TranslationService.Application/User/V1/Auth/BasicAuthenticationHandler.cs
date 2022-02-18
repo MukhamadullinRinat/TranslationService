@@ -37,9 +37,9 @@ namespace TranslationService.Application.User.V1.Auth
                 var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
                 var credentialBytes = Convert.FromBase64String(authHeader.Parameter);
                 var credentials = Encoding.UTF8.GetString(credentialBytes).Split(new[] { ':' }, 2);
-                var username = credentials[0];
+                var email = credentials[0];
                 var password = credentials[1];
-                user = await _userService.Authenticate(username, password);
+                user = await _userService.Authenticate(email, password);
             }
             catch
             {
@@ -47,7 +47,7 @@ namespace TranslationService.Application.User.V1.Auth
             }
 
             if (user == null)
-                return AuthenticateResult.Fail("Invalid Username or Password");
+                return AuthenticateResult.Fail("Invalid Email or Password");
 
             var claims = new[] {
                 new Claim(ClaimTypes.NameIdentifier, user.Guid.ToString()),

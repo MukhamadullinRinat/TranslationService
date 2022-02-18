@@ -26,6 +26,8 @@ using TranslationService.Application.User.V1;
 using TranslationService.Domain.User.V1.POST;
 using TranslationService.Domain.User.V1.GET;
 using TranslationService.Domain.User.V1.PUT;
+using TranslationService.Domain.User.V1.DELETE;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +37,32 @@ builder.Services.AddControllers();
 
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "BasicAuth", Version = "v1" });
+    c.AddSecurityDefinition("basic", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "basic",
+        In = ParameterLocation.Header,
+        Description = "Basic Authorization header using the Bearer scheme."
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "basic"
+                    }
+                },
+                new string[] {}
+        }
+    });
+});
 
 builder.Services.AddScoped<IRequestHandler<BookRequestPost, BookEntity>, BookPostHandler>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
@@ -58,6 +85,7 @@ builder.Services.AddScoped<IRequestHandler<UserPostRequest, UserEntity>, UserPos
 builder.Services.AddScoped<IRequestHandler<UserGetRequest, UserEntity>, UserGetHandler>();
 builder.Services.AddScoped<IRequestHandler<UserPutRequest, UserEntity>, UserPutHandler>();
 builder.Services.AddScoped<IRequestHandler<UserFilter, IEnumerable<UserEntity>>, UserListHandler>();
+builder.Services.AddScoped<IRequestHandler<UserDeleteRequest, Guid>, UserDeleteHandler>();
 
 builder.Services.AddAuthentication("BasicAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
