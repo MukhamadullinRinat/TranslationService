@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TranslationService.Domain.Book.V1;
 using TranslationService.Domain.Book.V1.DELETE;
@@ -10,6 +11,7 @@ using TranslationService.Domain.Book.V1.PUT;
 
 namespace TranslationService.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("book")]
     public class BookController : ControllerBase
@@ -52,6 +54,7 @@ namespace TranslationService.Controllers
         public async Task<Guid> DeleteAsync([FromRoute]Guid guid) =>
             await _mediator.Send(new BookRequestDelete { Guid = guid });
 
+        [AllowAnonymous]
         [HttpGet("file/{guid}")]
         public async Task<IActionResult> GetFileAsync([FromRoute]Guid guid)
         {

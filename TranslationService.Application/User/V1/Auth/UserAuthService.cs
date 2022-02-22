@@ -16,6 +16,6 @@ namespace TranslationService.Application.User.V1.Auth
         }
 
         public async Task<User> Authenticate(string email, string password) =>
-            (await _repository.GetAllAsync(new UserFilter { Email = email })).FirstOrDefault();
+            (await _repository.GetAllAsync(new UserFilter { Email = email, Password = password })).FirstOrDefault();
     }
 }

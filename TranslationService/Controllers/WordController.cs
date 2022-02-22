@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TranslationService.Domain.Word.V1;
 using TranslationService.Domain.Word.V1.DELETE;
@@ -9,6 +10,7 @@ using TranslationService.Domain.Word.V1.PUT;
 
 namespace TranslationService.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("word")]
     public class WordController : ControllerBase

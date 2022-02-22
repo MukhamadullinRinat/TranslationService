@@ -86,6 +86,7 @@ builder.Services.AddScoped<IRequestHandler<UserGetRequest, UserEntity>, UserGetH
 builder.Services.AddScoped<IRequestHandler<UserPutRequest, UserEntity>, UserPutHandler>();
 builder.Services.AddScoped<IRequestHandler<UserFilter, IEnumerable<UserEntity>>, UserListHandler>();
 builder.Services.AddScoped<IRequestHandler<UserDeleteRequest, Guid>, UserDeleteHandler>();
+builder.Services.AddScoped<IRequestHandler<UserAuthRequest, UserEntity>, UserAuthHandler>();
 
 builder.Services.AddAuthentication("BasicAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);

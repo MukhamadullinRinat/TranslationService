@@ -10,6 +10,7 @@ using TranslationService.Domain.User.V1.PUT;
 namespace TranslationService.Controllers
 {
     using TranslationService.Domain.User;
+    using TranslationService.Domain.User.V1.Auth;
 
     [Authorize]
     [ApiController]
@@ -43,5 +44,10 @@ namespace TranslationService.Controllers
         [HttpDelete("{guid}")]
         public async Task<Guid> DeleteAsync([FromRoute] Guid guid) =>
             await _mediator.Send(new UserDeleteRequest { Guid = guid });
+
+        [AllowAnonymous]
+        [HttpPost("auth")]
+        public async Task<User> AuthAsync(UserAuthRequest request) =>
+            await _mediator.Send(request);
     }
 }

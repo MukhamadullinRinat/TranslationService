@@ -10,5 +10,8 @@ namespace TranslationService.Domain.User.V1.List
 
         [DefaultValue(null)]
         public string? Email { get; set; }
+
+        [DefaultValue(null)]
+        public string? Password { get; set; }
     }
 }

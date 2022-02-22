@@ -52,6 +52,11 @@ namespace TranslationService.Infrastructure.Repositories
                 users = users.Where(u => u.Name == filter.Name);
             }
 
+            if (!string.IsNullOrEmpty(filter.Password))
+            {
+                users = users.Where(u => u.Password == filter.Password);
+            }
+
             return users;
         }
 

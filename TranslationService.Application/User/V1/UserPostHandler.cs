@@ -19,6 +19,13 @@ namespace TranslationService.Application.User.V1
 
         public async Task<User> Handle(UserPostRequest request, CancellationToken cancellationToken)
         {
+            var user = (await _repository.GetAllAsync(new UserFilter { Email = request.Email, Password = request.Password })).FirstOrDefault();
+
+            if (user != null)
+            {
+                throw new Exception("The user with this email and this password already existes. Please change the password!");
+            }
+
             var guid = await _repository.CreateAsync(new User { Email = request.Email, Name = request.Name, Password = request.Password });
 
             return await _repository.GetAsync(guid);
