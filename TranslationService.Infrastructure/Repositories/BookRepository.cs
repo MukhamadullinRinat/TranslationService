@@ -4,22 +4,36 @@ using TranslationService.Domain;
 using TranslationService.Domain.Book;
 using TranslationService.Domain.Book.V1;
 using TranslationService.Domain.Book.V1.List;
+using TranslationService.Domain.User;
 
 namespace TranslationService.Infrastructure.Repositories
 {
     public class BookRepository : IBookRepository
     {
+        private readonly ICurrentUserService _currentUserService;
         readonly private string _dataPath = Path.Combine($"{Directory.GetCurrentDirectory()}.Infrastructure", "Content/bookData.json");
 
         readonly private int _pageSize = 50;
 
+        public BookRepository(ICurrentUserService currentUserService)
+        {
+            _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
+        }
+
         public async Task<Guid> CreateAsync(BookCreateModel entity)
         {
-            var books = await GetAllBooksAsync();
+            var books = (await GetAllBooksAsync()).ToList();
 
             var guid = Guid.NewGuid();
 
-            var book = new BookJson { Title = entity.Title, Guid = guid, PageNumber = 1, Extension = entity.Extension, ContentType = entity.ContentType };
+            var book = new BookJson {
+                Title = entity.Title,
+                Guid = guid,
+                PageNumber = 1,
+                Extension = entity.Extension,
+                ContentType = entity.ContentType,
+                UserId = (await _currentUserService.GetCurrentUserAsync()).Guid
+            };
 
             books.Add(book);
 
@@ -91,7 +105,12 @@ namespace TranslationService.Infrastructure.Repositories
                 ContentType = b.ContentType
             });
 
-            return filter?.Title != null ? books.Where(b => b.Title == filter.Title) : books;
+            if (!string.IsNullOrEmpty(filter.Title))
+            {
+                books = books.Where(book => book.Title == filter.Title);
+            }
+
+            return books;
         }
 
         public async Task<Book> GetAsync(Guid id)
@@ -149,7 +168,7 @@ namespace TranslationService.Infrastructure.Repositories
             await File.WriteAllTextAsync(_dataPath, JsonConvert.SerializeObject(books));
         }
 
-        private async Task<List<BookJson>> GetAllBooksAsync()
+        private async Task<IEnumerable<BookJson>> GetAllBooksAsync()
         {
             var jsonData = await File.ReadAllTextAsync(_dataPath);
 
@@ -160,7 +179,9 @@ namespace TranslationService.Infrastructure.Repositories
                 throw new Exception($"{nameof(books)} is null");
             }
 
-            return books;
+            var user = await _currentUserService.GetCurrentUserAsync();
+
+            return books.Where(book => book.UserId.Equals(user.Guid));
         }
 
         private string GetContentBookPath(Guid guid, string extension) =>

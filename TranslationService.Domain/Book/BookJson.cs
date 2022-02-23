@@ -25,5 +25,7 @@
         public string Extension { get; set; }
 
         public string ContentType { get; set; }
+
+        public Guid UserId { get; set; }
     }
 }

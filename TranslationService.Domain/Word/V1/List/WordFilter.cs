@@ -7,5 +7,11 @@ namespace TranslationService.Domain.Word.V1.List
     {
         [DefaultValue(null)]
         public string? Value { get; set; }
+
+        [DefaultValue(null)]
+        public Guid? UserId { get; set; }
+
+        [DefaultValue(true)]
+        public bool Actual { get; set; }
     }
 }

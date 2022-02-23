@@ -28,6 +28,8 @@ using TranslationService.Domain.User.V1.GET;
 using TranslationService.Domain.User.V1.PUT;
 using TranslationService.Domain.User.V1.DELETE;
 using Microsoft.OpenApi.Models;
+using TranslationService.Application.User;
+using TranslationService.Domain.User;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,6 +92,9 @@ builder.Services.AddScoped<IRequestHandler<UserAuthRequest, UserEntity>, UserAut
 
 builder.Services.AddAuthentication("BasicAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 var app = builder.Build();
 

@@ -25,7 +25,15 @@ namespace TranslationService.Infrastructure.Repositories
 
         public async Task<Guid> DeleteAsync(Guid guid)
         {
-            var words = (await GetAllWordsAsync()).Where(w => w.Guid != guid);
+            var words = await GetAllWordsAsync();
+            var word = words.FirstOrDefault(w => w.Guid == guid);
+
+            if (word == null)
+            {
+                throw new Exception("No word with this identificator");
+            }
+
+            word.Closed = DateTime.Now;
 
             await File.WriteAllTextAsync(_dataPath, JsonConvert.SerializeObject(words));
 
@@ -39,6 +47,16 @@ namespace TranslationService.Infrastructure.Repositories
             if (!string.IsNullOrEmpty(filter.Value))
             {
                 words = words.Where(word => word.Value == filter.Value.ToLower().Trim());
+            }
+
+            if (filter.UserId.HasValue)
+            {
+                words = words.Where(word => word.UserId.Equals(filter.UserId.Value));
+            }
+
+            if (filter.Actual)
+            {
+                words = words.Where(word => word.Closed == null);
             }
 
             return words;

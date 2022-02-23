@@ -11,5 +11,9 @@
         public DateTime DateToRepeate { get; set; }
 
         public int RepetitionNumber { get; set; }
+
+        public Guid UserId { get; set; }
+
+        public DateTime? Closed { get; set; }
     }
 }
