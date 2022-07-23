@@ -21,6 +21,7 @@ using TranslationService.Infrastructure.Repositories;
 using BookEntity = TranslationService.Domain.Book.V1.Book;
 using WordEntity = TranslationService.Domain.Word.V1.Word;
 using UserEntity = TranslationService.Domain.User.User;
+using LanguageEntity = TranslationService.Domain.Languages.Language;
 using TranslationService.Domain.User.V1.List;
 using TranslationService.Application.User.V1;
 using TranslationService.Domain.User.V1.POST;
@@ -30,6 +31,8 @@ using TranslationService.Domain.User.V1.DELETE;
 using Microsoft.OpenApi.Models;
 using TranslationService.Application.User;
 using TranslationService.Domain.User;
+using TranslationService.Domain.Languages.V1.List;
+using TranslationService.Application.Language.V1;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,6 +92,9 @@ builder.Services.AddScoped<IRequestHandler<UserPutRequest, UserEntity>, UserPutH
 builder.Services.AddScoped<IRequestHandler<UserFilter, IEnumerable<UserEntity>>, UserListHandler>();
 builder.Services.AddScoped<IRequestHandler<UserDeleteRequest, Guid>, UserDeleteHandler>();
 builder.Services.AddScoped<IRequestHandler<UserAuthRequest, UserEntity>, UserAuthHandler>();
+
+builder.Services.AddScoped<IRepository<LanguageEntity, LanguageEntity, LanguageFilter>, LanguageRepository>();
+builder.Services.AddScoped<IRequestHandler<LanguageFilter, IEnumerable<LanguageEntity>>, LanguageListHandler>();
 
 builder.Services.AddAuthentication("BasicAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);

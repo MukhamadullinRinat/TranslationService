@@ -22,7 +22,7 @@ namespace TranslationService.Infrastructure.Repositories
 
         public async Task<Guid> CreateAsync(BookCreateModel entity)
         {
-            var books = (await GetAllBooksAsync()).ToList();
+            var books = (await GetAllBooksAsync((await _currentUserService.GetCurrentUserAsync()).Guid)).ToList();
 
             var guid = Guid.NewGuid();
 
@@ -78,7 +78,7 @@ namespace TranslationService.Infrastructure.Repositories
 
         public async Task<Guid> DeleteAsync(Guid guid)
         {
-            var books = await GetAllBooksAsync();
+            var books = await GetAllBooksAsync((await _currentUserService.GetCurrentUserAsync()).Guid);
             var bookJson = books.FirstOrDefault(b => b.Guid == guid);
 
             await File.WriteAllTextAsync(_dataPath, JsonConvert.SerializeObject(books.Where(b => !b.Guid.Equals(guid))));
@@ -95,7 +95,7 @@ namespace TranslationService.Infrastructure.Repositories
 
         public async Task<IEnumerable<Book>> GetAllAsync(BookFilter filter)
         {
-            var books = (await GetAllBooksAsync()).Select(b => new Book
+            var books = (await GetAllBooksAsync((await _currentUserService.GetCurrentUserAsync()).Guid)).Select(b => new Book
             {
                 Guid = b.Guid,
                 PageCount = b.PageCount,
@@ -155,7 +155,7 @@ namespace TranslationService.Infrastructure.Repositories
 
         public async Task UpdateAsync(Book entity)
         {
-            var books = (await GetAllBooksAsync()).Select(b => {
+            var books = (await GetAllBooksAsync((await _currentUserService.GetCurrentUserAsync()).Guid)).Select(b => {
                 if (entity.Guid.Equals(b.Guid))
                 {
                     b.Title = entity.Title;
@@ -168,7 +168,7 @@ namespace TranslationService.Infrastructure.Repositories
             await File.WriteAllTextAsync(_dataPath, JsonConvert.SerializeObject(books));
         }
 
-        private async Task<IEnumerable<BookJson>> GetAllBooksAsync()
+        private async Task<IEnumerable<BookJson>> GetAllBooksAsync(Guid? userId = null)
         {
             var jsonData = await File.ReadAllTextAsync(_dataPath);
 
@@ -179,9 +179,7 @@ namespace TranslationService.Infrastructure.Repositories
                 throw new Exception($"{nameof(books)} is null");
             }
 
-            var user = await _currentUserService.GetCurrentUserAsync();
-
-            return books.Where(book => book.UserId.Equals(user.Guid));
+            return userId.HasValue ? books.Where(book => book.UserId.Equals(userId.Value)) : books;
         }
 
         private string GetContentBookPath(Guid guid, string extension) =>
